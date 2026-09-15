@@ -1,29 +1,26 @@
 {
-  "costBasisMethod": "FIFO",
   "baseCurrency": "USD",
   "holdings": [
     {
       "ticker": "MU",
-      "quantity": null,
-      "avgCost": null,
-      "openedDate": null,
-      "account": null,
-      "strategy": "core",
-      "notes": "Current holding — quantity and average cost pending input"
+      "entryDate": null,
+      "entryAvg": null,
+      "notes": "Current holding — entry date and average entry price pending input"
     },
     {
       "ticker": "NOW",
-      "quantity": null,
-      "avgCost": null,
-      "openedDate": null,
-      "account": null,
-      "strategy": "core",
-      "notes": "Current holding — quantity and average cost pending input"
+      "entryDate": null,
+      "entryAvg": null,
+      "notes": "Current holding — entry date and average entry price pending input"
     }
   ],
-  "transactions": [],
-  "journalFields": {
-    "required": ["date", "ticker", "side", "quantity", "price"],
-    "recommended": ["fees", "account", "strategy", "thesis", "plannedStop", "plannedTarget", "notes"]
+  "trades": [],
+  "tradeFields": {
+    "required": ["ticker", "entryDate", "entryAvg", "exitDate", "exitAvg"],
+    "optional": ["strategy", "thesis", "exitReason", "notes"]
+  },
+  "calculation": {
+    "returnPct": "(exitAvg / entryAvg - 1) * 100",
+    "holdingDays": "exitDate - entryDate"
   }
 }
