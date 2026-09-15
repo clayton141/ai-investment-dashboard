@@ -1,0 +1,33 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Software & Cybersecurity Dashboard</title>
+<style>
+body{margin:0;background:#08131f;color:#eaf2fb;font-family:Arial,sans-serif}.wrap{max-width:1400px;margin:auto;padding:24px}
+.top{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.muted{color:#91a8bd}.badge{background:#132a42;padding:10px 12px;border-radius:10px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}.card{background:#0f2236;border:1px solid #24415e;border-radius:14px;padding:16px}
+.ticker{font-size:20px;font-weight:700}.price{font-size:28px;font-weight:800;margin:8px 0}.pos{color:#2bd576}.neg{color:#ff6b6b}
+.row{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid rgba(255,255,255,.07);font-size:13px}
+.section{margin-top:24px}.tablewrap{overflow:auto;background:#0f2236;border:1px solid #24415e;border-radius:14px}
+table{border-collapse:collapse;width:100%;min-width:1000px}th,td{padding:11px 12px;border-bottom:1px solid rgba(255,255,255,.06);text-align:right;font-size:13px}
+th:first-child,td:first-child{text-align:left}th{background:#132a42;color:#bdd0e2}.thesis{line-height:1.45;font-size:13px}.small{font-size:12px;color:#91a8bd}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.grid{grid-template-columns:1fr}.top{display:block}.badge{display:inline-block;margin-top:10px}}
+</style></head><body><div class="wrap">
+<div class="top"><div><h1>AI Software & Cybersecurity Dashboard</h1><div class="muted">NOW · ZS · RBRK · FTNT</div></div><div id="stamp" class="badge">Loading…</div></div>
+<div id="cards" class="grid"></div>
+<div class="section"><h2>Fundamental & Valuation</h2><div class="tablewrap"><table><thead><tr>
+<th>Ticker</th><th>Revenue Growth</th><th>FCF Margin</th><th>SBC/Revenue</th><th>Fwd P/E</th><th>EV/Sales</th><th>P/FCF</th><th>AI Opp.</th><th>Quality</th><th>Valuation</th><th>Risk/Reward</th>
+</tr></thead><tbody id="fund"></tbody></table></div></div>
+<div class="section"><h2>$1M — 12M Wild Guess</h2><div id="scen" class="grid"></div></div>
+<div class="section"><h2>AI Thesis & Key Risk</h2><div id="theses" class="grid"></div></div>
+<div class="small" style="margin-top:20px">Research dashboard only; not investment advice. Production version keeps the same page and overwrites data.json after each completed US trading day.</div>
+</div><script>
+const money=n=>n==null?'—':'$'+n.toLocaleString(undefined,{maximumFractionDigits:2});
+const pct=n=>n==null?'—':(n>0?'+':'')+n.toFixed(1)+'%';
+const x=n=>n==null?'—':n.toFixed(1)+'x';
+fetch('./data.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{
+document.getElementById('stamp').textContent=`Data through ${d.asOf} · ${d.updatedAt}`;
+document.getElementById('cards').innerHTML=d.watchlist.map(s=>`<div class="card"><div class="ticker">${s.ticker} <span class="small">${s.name}</span></div><div class="price">${money(s.price)}</div><div class="${s.dayPct>=0?'pos':'neg'}">${pct(s.dayPct)}</div><div class="row"><span class="muted">RSI(14)</span><b>${s.rsi14.toFixed(1)}</b></div><div class="row"><span class="muted">MA20 / 50 / 200</span><b>${s.ma20.toFixed(1)} / ${s.ma50.toFixed(1)} / ${s.ma200.toFixed(1)}</b></div><div class="row"><span class="muted">Risk / Reward</span><b>${s.riskReward.toFixed(1)}/10</b></div></div>`).join('');
+document.getElementById('fund').innerHTML=d.watchlist.map(s=>`<tr><td><b>${s.ticker}</b></td><td>${pct(s.revenueGrowth)}</td><td>${pct(s.fcfMargin)}</td><td>${pct(s.sbcRevenue)}</td><td>${x(s.forwardPE)}</td><td>${x(s.evSales)}</td><td>${x(s.pFcf)}</td><td>${s.aiOpportunity}</td><td>${s.companyQuality}</td><td>${s.valuation}</td><td><b>${s.riskReward}</b></td></tr>`).join('');
+document.getElementById('scen').innerHTML=d.watchlist.map(s=>{let b=1000000*(1+s.bearPct/100),m=1000000*(1+s.basePct/100),u=1000000*(1+s.bullPct/100);return `<div class="card"><div class="ticker">${s.ticker}</div><div class="row"><span>Bear ${pct(s.bearPct)}</span><b class="neg">${money(b)}</b></div><div class="row"><span>Base ${pct(s.basePct)}</span><b class="pos">${money(m)}</b></div><div class="row"><span>Bull ${pct(s.bullPct)}</span><b class="pos">${money(u)}</b></div></div>`}).join('');
+document.getElementById('theses').innerHTML=d.watchlist.map(s=>`<div class="card"><div class="ticker">${s.ticker}</div><div class="small" style="margin:8px 0">AI thesis</div><div class="thesis">${s.thesis}</div><div class="small" style="margin:12px 0 6px">Key risk</div><div class="thesis">${s.risk}</div></div>`).join('');
+});
+</script></body></html>
