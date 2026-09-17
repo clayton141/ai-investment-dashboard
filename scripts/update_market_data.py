@@ -10,6 +10,7 @@ import yfinance as yf
 
 DATA = Path("data.json")
 TAIPEI = ZoneInfo("Asia/Taipei")
+NEW_YORK = ZoneInfo("America/New_York")
 TECH = ("price","dayPct","rsi14","ma20","ma50","ma200")
 FUND = ("revenueGrowth","fcfMargin","sbcRevenue","forwardPE","evSales","pFcf")
 
@@ -60,6 +61,13 @@ def expected_session():
     return done.index[-1].date().isoformat()
 
 
+def session_day(value):
+    ts = pd.Timestamp(value)
+    if ts.tzinfo is not None:
+        ts = ts.tz_convert(NEW_YORK)
+    return ts.date().isoformat()
+
+
 def history(symbol, expected):
     end = datetime.fromisoformat(expected).date() + timedelta(days=2)
     start = end - timedelta(days=800)
@@ -76,22 +84,27 @@ def history(symbol, expected):
         raise RuntimeError("no history")
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
+
+    raw_close = pd.to_numeric(df["Close"], errors="coerce")
+    indicator_close = raw_close
     if "Adj Close" in df:
-        df["Close"] = pd.to_numeric(df["Adj Close"], errors="coerce").fillna(
-            pd.to_numeric(df["Close"], errors="coerce")
-        )
-    dates = pd.Index([pd.Timestamp(i).date().isoformat() for i in df.index])
+        indicator_close = pd.to_numeric(df["Adj Close"], errors="coerce").fillna(raw_close)
+    df["RawClose"] = raw_close
+    df["IndicatorClose"] = indicator_close
+
+    dates = pd.Index([session_day(i) for i in df.index])
     if expected not in set(dates):
         last = dates[-1] if len(dates) else "none"
-        raise RuntimeError(f"latest={last}, expected={expected}")
-    df = df.loc[dates <= expected].dropna(subset=["Close"])
+        raise RuntimeError(f"latest_session={last}, expected={expected}")
+    df = df.loc[dates <= expected].dropna(subset=["RawClose", "IndicatorClose"])
     if len(df) < 210:
         raise RuntimeError(f"only {len(df)} rows")
     return df
 
 
 def technicals(df):
-    c = pd.to_numeric(df["Close"], errors="coerce").dropna()
+    raw = pd.to_numeric(df["RawClose"], errors="coerce").dropna()
+    c = pd.to_numeric(df["IndicatorClose"], errors="coerce").dropna()
     d = c.diff()
     gain, loss = d.clip(lower=0), -d.clip(upper=0)
     ag = gain.ewm(alpha=1/14, adjust=False, min_periods=14).mean()
@@ -100,8 +113,8 @@ def technicals(df):
     rsi = 100 - 100/(1+rs)
     rv = 100.0 if pd.isna(rsi.iloc[-1]) and al.iloc[-1] == 0 else float(rsi.iloc[-1])
     return {
-        "price": round(float(c.iloc[-1]), 2),
-        "dayPct": round((float(c.iloc[-1])/float(c.iloc[-2])-1)*100, 2),
+        "price": round(float(raw.iloc[-1]), 2),
+        "dayPct": round((float(raw.iloc[-1])/float(raw.iloc[-2])-1)*100, 2),
         "rsi14": round(rv, 3),
         "ma20": round(float(c.rolling(20).mean().iloc[-1]), 2),
         "ma50": round(float(c.rolling(50).mean().iloc[-1]), 2),
@@ -168,7 +181,7 @@ def main():
     new["asOf"] = expected
     new["automation"] = {
         "marketData": "Yahoo Finance explicit-date download",
-        "schedule": "Tue-Sat 09:35 and 11:35 Asia/Taipei",
+        "schedule": "Tue-Sat 09:35, 11:35 and 13:35 Asia/Taipei",
         "autoFields": list(TECH + FUND),
         "preservedFields": [
             "aiOpportunity","companyQuality","valuation","riskReward",
