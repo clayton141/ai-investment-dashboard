@@ -63,8 +63,9 @@ def expected_session():
 
 def session_day(value):
     ts = pd.Timestamp(value)
-    if ts.tzinfo is not None:
-        ts = ts.tz_convert(NEW_YORK)
+    if ts.tzinfo is None:
+        ts = ts.tz_localize("UTC")
+    ts = ts.tz_convert(NEW_YORK)
     return ts.date().isoformat()
 
 
