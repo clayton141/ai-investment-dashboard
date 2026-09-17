@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 import copy
+import io
 import json
 import math
 import time
-from datetime import datetime, time as dtime
+from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import pandas as pd
+import pandas_market_calendars as mcal
+import requests
 import yfinance as yf
 
 DATA_PATH = Path("data.json")
 TAIPEI = ZoneInfo("Asia/Taipei")
-NEW_YORK = ZoneInfo("America/New_York")
-
 TECH_FIELDS = ("price", "dayPct", "rsi14", "ma20", "ma50", "ma200")
 FUND_FIELDS = ("revenueGrowth", "fcfMargin", "sbcRevenue", "forwardPE", "evSales", "pFcf")
 
@@ -54,20 +55,80 @@ def latest_quarter_yoy(row):
     return (latest / prior - 1) * 100
 
 
-def market_history(ticker):
-    hist = yf.Ticker(ticker).history(period="2y", interval="1d", auto_adjust=True)
-    if hist is None or hist.empty:
-        raise RuntimeError("no price history returned")
-    hist = hist.dropna(subset=["Close"]).copy()
+def expected_complete_session():
+    now_utc = pd.Timestamp.now(tz="UTC")
+    calendar = mcal.get_calendar("NYSE")
+    start = (now_utc - pd.Timedelta(days=14)).date()
+    end = (now_utc + pd.Timedelta(days=1)).date()
+    schedule = calendar.schedule(start_date=start, end_date=end)
+    completed = schedule[schedule["market_close"] <= now_utc]
+    if completed.empty:
+        raise RuntimeError("could not resolve latest completed NYSE session")
+    return completed.index[-1].date().isoformat()
 
-    # Never use an in-progress US trading day.
-    now_ny = datetime.now(NEW_YORK)
-    last_date = pd.Timestamp(hist.index[-1]).date()
-    if last_date == now_ny.date() and now_ny.time() < dtime(16, 15):
-        hist = hist.iloc[:-1]
-    if len(hist) < 210:
-        raise RuntimeError(f"insufficient history ({len(hist)} rows)")
-    return hist
+
+def yahoo_history(symbol):
+    hist = yf.Ticker(symbol).history(period="2y", interval="1d", auto_adjust=True)
+    if hist is None or hist.empty:
+        raise RuntimeError("Yahoo returned no price history")
+    return hist.dropna(subset=["Close"]).copy()
+
+
+def stooq_history(symbol):
+    end = datetime.now(TAIPEI).date()
+    start = end - timedelta(days=800)
+    url = (
+        "https://stooq.com/q/d/l/"
+        f"?s={symbol.lower()}.us&i=d&d1={start:%Y%m%d}&d2={end:%Y%m%d}"
+    )
+    response = requests.get(
+        url,
+        timeout=20,
+        headers={"User-Agent": "ai-investment-dashboard/1.0"},
+    )
+    response.raise_for_status()
+    frame = pd.read_csv(io.StringIO(response.text))
+    if frame.empty or "Date" not in frame or "Close" not in frame:
+        raise RuntimeError("Stooq returned no usable price history")
+    frame["Date"] = pd.to_datetime(frame["Date"])
+    frame = frame.set_index("Date").sort_index()
+    return frame.dropna(subset=["Close"]).copy()
+
+
+def truncate_to_expected(hist, expected):
+    dates = pd.Index([pd.Timestamp(i).date().isoformat() for i in hist.index])
+    if expected not in set(dates):
+        return None
+    mask = dates <= expected
+    return hist.loc[mask].copy()
+
+
+def validated_history(symbol, expected):
+    problems = []
+    for attempt in range(3):
+        try:
+            hist = yahoo_history(symbol)
+            valid = truncate_to_expected(hist, expected)
+            if valid is not None and len(valid) >= 210:
+                return valid, "yfinance"
+            last = pd.Timestamp(hist.index[-1]).date().isoformat()
+            problems.append(f"Yahoo latest={last}, expected={expected}")
+        except Exception as exc:
+            problems.append(f"Yahoo error: {exc}")
+        if attempt < 2:
+            time.sleep(4 * (attempt + 1))
+
+    try:
+        hist = stooq_history(symbol)
+        valid = truncate_to_expected(hist, expected)
+        if valid is not None and len(valid) >= 210:
+            return valid, "stooq"
+        last = pd.Timestamp(hist.index[-1]).date().isoformat()
+        problems.append(f"Stooq latest={last}, expected={expected}")
+    except Exception as exc:
+        problems.append(f"Stooq error: {exc}")
+
+    raise RuntimeError("; ".join(problems))
 
 
 def technicals(hist):
@@ -88,7 +149,6 @@ def technicals(hist):
         rsi_value = float(rsi.iloc[-1])
 
     return {
-        "asOf": pd.Timestamp(hist.index[-1]).date().isoformat(),
         "price": round(latest, 2),
         "dayPct": round((latest / prev - 1) * 100, 2),
         "rsi14": round(rsi_value, 3),
@@ -107,8 +167,7 @@ def fundamentals(ticker_symbol):
     revenue_ttm = ttm(revenue_row)
     revenue_growth = latest_quarter_yoy(revenue_row)
 
-    fcf_row = pick_row(cashflow, ("Free Cash Flow",))
-    fcf_ttm = ttm(fcf_row)
+    fcf_ttm = ttm(pick_row(cashflow, ("Free Cash Flow",)))
     if fcf_ttm is None:
         ocf = ttm(pick_row(cashflow, ("Operating Cash Flow", "Total Cash From Operating Activities")))
         capex = ttm(pick_row(cashflow, ("Capital Expenditure", "Capital Expenditures")))
@@ -151,36 +210,40 @@ def fundamentals(ticker_symbol):
 def main():
     original = json.loads(DATA_PATH.read_text(encoding="utf-8"))
     candidate = copy.deepcopy(original)
-    errors = {}
-    as_of_dates = []
+    expected = expected_complete_session()
 
+    # Market data is atomic: either every ticker reaches the same completed session,
+    # or we write nothing and let the later scheduled retry handle provider lag.
+    histories = {}
+    sources = {}
+    failures = {}
     for stock in candidate.get("watchlist", []):
         symbol = stock["ticker"]
         try:
-            tech = technicals(market_history(symbol))
-            as_of_dates.append(tech.pop("asOf"))
-            stock.update(tech)
+            histories[symbol], sources[symbol] = validated_history(symbol, expected)
         except Exception as exc:
-            errors.setdefault(symbol, []).append(f"technicals: {exc}")
+            failures[symbol] = str(exc)
 
+    if failures:
+        raise RuntimeError(
+            "Market data incomplete; data.json left untouched. "
+            + json.dumps(failures, ensure_ascii=False)
+        )
+
+    warnings = {}
+    for stock in candidate.get("watchlist", []):
+        symbol = stock["ticker"]
+        stock.update(technicals(histories[symbol]))
         try:
-            fresh_fundamentals = fundamentals(symbol)
-            for key, value in fresh_fundamentals.items():
-                if value is not None:
-                    stock[key] = value
+            stock.update(fundamentals(symbol))
         except Exception as exc:
-            errors.setdefault(symbol, []).append(f"fundamentals: {exc}")
+            warnings.setdefault(symbol, []).append(f"fundamentals preserved: {exc}")
 
-        time.sleep(0.4)
-
-    if as_of_dates:
-        # All tickers should resolve to the same last complete US trading day.
-        candidate["asOf"] = min(as_of_dates)
-
-    # Curated qualitative fields stay unchanged until a research pass updates them.
+    candidate["asOf"] = expected
     candidate["automation"] = {
-        "marketData": "yfinance",
-        "schedule": "Tue-Sat 08:35 Asia/Taipei",
+        "marketData": "Yahoo Finance with Stooq fallback",
+        "schedule": "Tue-Sat 09:35 and 11:35 Asia/Taipei",
+        "marketSources": sources,
         "autoFields": list(TECH_FIELDS + FUND_FIELDS),
         "preservedFields": [
             "aiOpportunity",
@@ -191,11 +254,12 @@ def main():
             "risk",
             "bearPct",
             "basePct",
-            "bullPct"
+            "bullPct",
+            "ARR/cRPO/billings"
         ]
     }
-    if errors:
-        candidate["automation"]["warnings"] = errors
+    if warnings:
+        candidate["automation"]["warnings"] = warnings
 
     comparable_old = copy.deepcopy(original)
     comparable_new = copy.deepcopy(candidate)
@@ -203,7 +267,7 @@ def main():
     comparable_new.pop("updatedAt", None)
 
     if comparable_new == comparable_old:
-        print("No dashboard data changes; leaving data.json untouched.")
+        print(f"No changes; data.json already reflects {expected}.")
         return
 
     candidate["updatedAt"] = datetime.now(TAIPEI).strftime("%Y-%m-%d %H:%M Asia/Taipei")
@@ -211,7 +275,7 @@ def main():
         json.dumps(candidate, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8"
     )
-    print(f"Updated data.json through {candidate.get('asOf')}.")
+    print(f"Updated data.json through {expected}.")
 
 
 if __name__ == "__main__":
