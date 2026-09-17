@@ -2,10 +2,11 @@ name: Update investment dashboard data
 
 on:
   schedule:
-    # Two post-close attempts for provider-lag resilience.
-    # 09:35 and 11:35 Asia/Taipei, Tuesday-Saturday.
+    # Three post-close attempts for provider-lag resilience.
+    # 09:35, 11:35 and 13:35 Asia/Taipei, Tuesday-Saturday.
     - cron: '35 1 * * 2-6'
     - cron: '35 3 * * 2-6'
+    - cron: '35 5 * * 2-6'
   workflow_dispatch:
   push:
     branches: [main]
