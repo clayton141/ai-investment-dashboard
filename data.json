@@ -25,7 +25,11 @@
       "basePct": 24,
       "bullPct": 45,
       "thesis": "Enterprise workflow + AI Control Tower; system of action for human and agent workflows.",
-      "risk": "Agentic AI could abstract the UI; M&A and SBC discipline matter."
+      "risk": "Agentic AI could abstract the UI; M&A and SBC discipline matter.",
+      "preMarketPrice": 141.38,
+      "preMarketPct": 1.12,
+      "preMarketAsOf": "2026-09-17 05:13 ET",
+      "preMarketState": "PRE"
     },
     {
       "ticker": "ZS",
@@ -50,7 +54,11 @@
       "basePct": 15,
       "bullPct": 45,
       "thesis": "Zero Trust for users, workloads and AI agents; Agentic SOC + data security.",
-      "risk": "FY27 guide implies ~17% growth; rerating requires organic ARR re-acceleration."
+      "risk": "FY27 guide implies ~17% growth; rerating requires organic ARR re-acceleration.",
+      "preMarketPrice": 192.0,
+      "preMarketPct": 0.22,
+      "preMarketAsOf": "2026-09-17 05:16 ET",
+      "preMarketState": "PRE"
     },
     {
       "ticker": "RBRK",
@@ -75,7 +83,11 @@
       "basePct": 28,
       "bullPct": 65,
       "thesis": "Cyber resilience + Agent Cloud + recovery / rewind after agent or attack failures.",
-      "risk": "Still GAAP loss-making; high SBC and multiple require >30% growth to persist."
+      "risk": "Still GAAP loss-making; high SBC and multiple require >30% growth to persist.",
+      "preMarketPrice": 104.61,
+      "preMarketPct": -0.35,
+      "preMarketAsOf": "2026-09-17 05:00 ET",
+      "preMarketState": "PRE"
     },
     {
       "ticker": "FTNT",
@@ -100,7 +112,11 @@
       "basePct": 18,
       "bullPct": 35,
       "thesis": "Secure networking + SASE + AI workload protection; Virtue AI expands agent/runtime security.",
-      "risk": "Valuation is no longer cheap; AI-security purity lower than ZS/CRWD."
+      "risk": "Valuation is no longer cheap; AI-security purity lower than ZS/CRWD.",
+      "preMarketPrice": 171.55,
+      "preMarketPct": -0.13,
+      "preMarketAsOf": "2026-09-17 05:18 ET",
+      "preMarketState": "PRE"
     },
     {
       "ticker": "MU",
@@ -125,7 +141,11 @@
       "basePct": 25,
       "bullPct": 65,
       "thesis": "AI memory cycle, HBM demand and data-center DRAM/NAND growth; new 512GB DDR5 AI-server module reinforces high-capacity memory demand.",
-      "risk": "Highly cyclical memory pricing and capex intensity; Taiwan labor negotiations add a near-term supply-execution risk."
+      "risk": "Highly cyclical memory pricing and capex intensity; Taiwan labor negotiations add a near-term supply-execution risk.",
+      "preMarketPrice": 941.52,
+      "preMarketPct": 1.62,
+      "preMarketAsOf": "2026-09-17 05:20 ET",
+      "preMarketState": "PRE"
     },
     {
       "ticker": "CRWD",
@@ -150,7 +170,11 @@
       "basePct": 12,
       "bullPct": 40,
       "thesis": "Cloud-native security platform spanning endpoint, identity, cloud, SIEM and AI-agent security.",
-      "risk": "Premium valuation leaves little room for execution misses or multiple compression."
+      "risk": "Premium valuation leaves little room for execution misses or multiple compression.",
+      "preMarketPrice": 239.63,
+      "preMarketPct": -0.72,
+      "preMarketAsOf": "2026-09-17 05:15 ET",
+      "preMarketState": "PRE"
     },
     {
       "ticker": "SNOW",
@@ -175,7 +199,11 @@
       "basePct": 20,
       "bullPct": 50,
       "thesis": "Enterprise data + AI consumption platform; AI workloads can accelerate product consumption.",
-      "risk": "Premium valuation, high SBC and intense competition from Databricks and hyperscalers."
+      "risk": "Premium valuation, high SBC and intense competition from Databricks and hyperscalers.",
+      "preMarketPrice": 333.75,
+      "preMarketPct": 0.82,
+      "preMarketAsOf": "2026-09-17 05:00 ET",
+      "preMarketState": "PRE"
     },
     {
       "ticker": "BE",
@@ -200,7 +228,11 @@
       "basePct": 18,
       "bullPct": 60,
       "thesis": "On-site power for data centers; AI-driven electricity demand can accelerate deployments.",
-      "risk": "Project execution, financing needs, policy exposure and volatile expectations."
+      "risk": "Project execution, financing needs, policy exposure and volatile expectations.",
+      "preMarketPrice": 284.2,
+      "preMarketPct": 5.25,
+      "preMarketAsOf": "2026-09-17 05:15 ET",
+      "preMarketState": "PRE"
     },
     {
       "ticker": "GLW",
@@ -225,7 +257,11 @@
       "basePct": 25,
       "bullPct": 50,
       "thesis": "Optical connectivity and fiber demand from AI data-center buildouts.",
-      "risk": "AI exposure is indirect and broader industrial/display cycles can dilute the thesis."
+      "risk": "AI exposure is indirect and broader industrial/display cycles can dilute the thesis.",
+      "preMarketPrice": 148.6,
+      "preMarketPct": 3.08,
+      "preMarketAsOf": "2026-09-17 05:10 ET",
+      "preMarketState": "PRE"
     }
   ],
   "automation": {
@@ -257,5 +293,7 @@
       "bullPct",
       "ARR/cRPO/billings"
     ]
-  }
+  },
+  "preMarketStatus": "PRE",
+  "preMarketUpdatedAt": "2026-09-17 17:20 Asia/Taipei"
 }
