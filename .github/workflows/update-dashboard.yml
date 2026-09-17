@@ -2,8 +2,10 @@ name: Update investment dashboard data
 
 on:
   schedule:
-    # 08:35 Asia/Taipei, Tuesday-Saturday = after each completed US trading day.
-    - cron: '35 0 * * 2-6'
+    # Two post-close attempts for provider-lag resilience.
+    # 09:35 and 11:35 Asia/Taipei, Tuesday-Saturday.
+    - cron: '35 1 * * 2-6'
+    - cron: '35 3 * * 2-6'
   workflow_dispatch:
   push:
     branches: [main]
@@ -21,7 +23,7 @@ concurrency:
 jobs:
   update-data:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,7 +36,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: python -m pip install --upgrade pip yfinance pandas
+        run: python -m pip install --upgrade pip yfinance pandas pandas-market-calendars requests
 
       - name: Update market and financial data
         run: python scripts/update_market_data.py
