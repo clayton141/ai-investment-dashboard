@@ -168,7 +168,11 @@ def main():
         except Exception as e:
             failures[s["ticker"]] = str(e)
     if failures:
-        raise RuntimeError("Incomplete market data; refusing to write: " + json.dumps(failures))
+        message = "Provider lag; data.json left untouched: " + json.dumps(failures)
+        if datetime.now(TAIPEI).hour >= 13:
+            raise RuntimeError(message)
+        print(message)
+        return
 
     warnings = {}
     for s in new.get("watchlist", []):
