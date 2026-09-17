@@ -63,10 +63,12 @@ def expected_session():
 
 def session_day(value):
     ts = pd.Timestamp(value)
+    # yfinance daily downloads normally use a timezone-naive Date index.
+    # That date already IS the exchange session date; interpreting it as UTC
+    # shifts it back one day in New York and falsely marks fresh data as stale.
     if ts.tzinfo is None:
-        ts = ts.tz_localize("UTC")
-    ts = ts.tz_convert(NEW_YORK)
-    return ts.date().isoformat()
+        return ts.date().isoformat()
+    return ts.tz_convert(NEW_YORK).date().isoformat()
 
 
 def history(symbol, expected):
@@ -168,10 +170,10 @@ def main():
         except Exception as e:
             failures[s["ticker"]] = str(e)
     if failures:
-        message = "Provider lag; data.json left untouched: " + json.dumps(failures)
-        if datetime.now(TAIPEI).hour >= 13:
-            raise RuntimeError(message)
-        print(message)
+        # A market-data provider can lag after the close. Never corrupt the
+        # dashboard and don't fail the workflow just because the provider is late;
+        # the next scheduled attempt will retry automatically.
+        print("Provider lag; data.json left untouched: " + json.dumps(failures))
         return
 
     warnings = {}
