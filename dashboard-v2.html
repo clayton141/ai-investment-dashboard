@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AI Investment Dashboard</title>
+  <style>
+    :root{--bg:#08131f;--panel:#0f2236;--panel2:#132a42;--text:#eaf2fb;--muted:#91a8bd;--line:#24415e;--green:#2bd576;--red:#ff6b6b}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif}
+    .wrap{max-width:1500px;margin:auto;padding:24px}.hidden{display:none!important}.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+    .muted{color:var(--muted)}.small{font-size:12px}.ticker{font-weight:800;font-size:20px}.price{font-size:27px;font-weight:800;margin:8px 0}
+    .pos{color:var(--green)}.neg{color:var(--red)}.section{margin-top:24px}.row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,.07);font-size:13px}
+    .tablewrap{overflow:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}table{width:100%;border-collapse:collapse;min-width:900px}
+    th,td{padding:11px 12px;border-bottom:1px solid rgba(255,255,255,.06);text-align:right;font-size:13px}th:first-child,td:first-child{text-align:left}
+    th{background:var(--panel2);color:#bdd0e2}.btn{border:0;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer;background:#285b8e;color:white}
+    .btn.secondary{background:#1a344e}.btn.danger{background:#75313a}.actions{display:flex;gap:8px;flex-wrap:wrap}
+    input,textarea{width:100%;background:#0a1a29;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px}
+    .formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.login{max-width:420px;margin:12vh auto}.notice{padding:12px;border:1px solid var(--line);border-radius:10px;background:#10263b}
+    .pill{display:inline-block;padding:3px 8px;border-radius:999px;background:#1b3856;color:#cfe4f7;font-size:11px}
+    @media(max-width:950px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.wrap{padding:16px}.grid,.formgrid{grid-template-columns:1fr}.top{display:block}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div id="loginView" class="login panel">
+    <h1>AI Investment Dashboard</h1>
+    <p class="muted">Private access for invited friends & family.</p>
+    <label for="loginEmail">Email</label>
+    <input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com">
+    <button id="loginBtn" class="btn" style="margin-top:12px;width:100%">Send Magic Link</button>
+    <div id="loginMsg" class="small muted" style="margin-top:12px"></div>
+  </div>
+
+  <div id="appView" class="hidden">
+    <div class="top">
+      <div>
+        <h1 style="margin:0">AI / Cyber / Infrastructure Dashboard</h1>
+        <div class="muted">MU · NOW · ZS · RBRK · FTNT · CRWD · SNOW · BE · GLW</div>
+        <div id="marketAsOf" class="small muted" style="margin-top:6px"></div>
+      </div>
+      <div class="actions">
+        <span id="roleBadge" class="pill"></span>
+        <button id="addHoldingBtn" class="btn hidden">+ Holding</button>
+        <button id="addTradeBtn" class="btn hidden">+ Trade</button>
+        <button id="logoutBtn" class="btn secondary">Logout</button>
+      </div>
+    </div>
+
+    <div class="section"><h2>目前持有</h2><div id="holdings" class="grid"></div></div>
+    <div class="section"><h2>Watchlist</h2><div id="cards" class="grid"></div></div>
+
+    <div class="section">
+      <h2>交易紀錄</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Ticker</th><th>進場日期</th><th>進場均價</th><th>出場日期</th><th>出場均價</th><th>報酬率</th><th>持有天數</th><th>Strategy</th><th>Exit reason</th><th></th></tr></thead>
+        <tbody id="trades"></tbody>
+      </table></div>
+    </div>
+
+    <div class="section">
+      <h2>Fundamental & Valuation</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Ticker</th><th>Revenue Growth</th><th>FCF Margin</th><th>SBC/Revenue</th><th>Fwd P/E</th><th>EV/Sales</th><th>P/FCF</th><th>Quality</th><th>Valuation</th><th>Risk/Reward</th></tr></thead>
+        <tbody id="fund"></tbody>
+      </table></div>
+    </div>
+    <div id="editor" class="section panel hidden"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./supabase-config.js"></script>
+<script src="./market-data.js"></script>
+<script src="./dashboard-v2.js"></script>
+</body>
+</html>
