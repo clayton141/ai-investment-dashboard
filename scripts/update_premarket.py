@@ -9,10 +9,17 @@ import pandas as pd
 import yfinance as yf
 
 DATA = Path("data.json")
+MARKET_JS = Path("market-data.js")
 NY = ZoneInfo("America/New_York")
 TAIPEI = ZoneInfo("Asia/Taipei")
 PRE_OPEN = dtime(4, 0)
 REGULAR_OPEN = dtime(9, 30)
+
+def sync_market_js(payload):
+    MARKET_JS.write_text(
+        "window.MARKET_DATA = " + json.dumps(payload, ensure_ascii=False, indent=2) + ";\n",
+        encoding="utf-8",
+    )
 
 
 def finite(x):
@@ -115,6 +122,7 @@ def main():
     # Outside premarket, only write if stale PRE fields need clearing.
     if in_premarket or changed:
         DATA.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        sync_market_js(payload)
         print(f"Premarket snapshot updated. status={payload.get('preMarketStatus')} warnings={len(warnings)}")
     else:
         print("Premarket closed and no stale fields to clear; no data.json change.")
