@@ -1,6 +1,6 @@
 window.MARKET_DATA = {
   "asOf": "2026-09-17",
-  "updatedAt": "2026-09-18 14:32 Asia/Taipei",
+  "updatedAt": "2026-09-18 16:26 Asia/Taipei",
   "watchlist": [
     {
       "ticker": "NOW",
@@ -130,7 +130,7 @@ window.MARKET_DATA = {
       "revenueGrowth": 345.7,
       "fcfMargin": 29.0,
       "sbcRevenue": 1.3,
-      "forwardPE": 6.2,
+      "forwardPE": 6.3,
       "evSales": 12.0,
       "pFcf": 42.2,
       "aiOpportunity": 9.5,
@@ -248,7 +248,7 @@ window.MARKET_DATA = {
       "sbcRevenue": 2.5,
       "forwardPE": 34.0,
       "evSales": 7.9,
-      "pFcf": 53.2,
+      "pFcf": 53.0,
       "aiOpportunity": 8.0,
       "companyQuality": 8.5,
       "valuation": 6.0,
