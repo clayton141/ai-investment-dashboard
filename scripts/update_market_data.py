@@ -10,10 +10,17 @@ import pandas_market_calendars as mcal
 import yfinance as yf
 
 DATA = Path("data.json")
+MARKET_JS = Path("market-data.js")
 TAIPEI = ZoneInfo("Asia/Taipei")
 NEW_YORK = ZoneInfo("America/New_York")
 TECH = ("price","dayPct","rsi14","ma20","ma50","ma200")
 FUND = ("revenueGrowth","fcfMargin","sbcRevenue","forwardPE","evSales","pFcf")
+
+def sync_market_js(payload):
+    MARKET_JS.write_text(
+        "window.MARKET_DATA = " + json.dumps(payload, ensure_ascii=False, indent=2) + ";\n",
+        encoding="utf-8",
+    )
 
 
 def num(x):
@@ -126,7 +133,10 @@ def main():
     new["automation"]={"marketData":"Yahoo Finance explicit-date download","schedule":"Tue-Sat 09:35, 11:35 and 13:35 Asia/Taipei","autoFields":list(TECH+FUND),"preservedFields":["aiOpportunity","companyQuality","valuation","riskReward","thesis","risk","bearPct","basePct","bullPct","ARR/cRPO/billings"]}
     if warnings: new["automation"]["warnings"]=warnings
     a,b=copy.deepcopy(old),copy.deepcopy(new); a.pop("updatedAt",None); b.pop("updatedAt",None)
-    if a==b: print(f"No changes; already current through {expected}."); return
-    new["updatedAt"]=datetime.now(TAIPEI).strftime("%Y-%m-%d %H:%M Asia/Taipei"); DATA.write_text(json.dumps(new,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"); print(f"Updated data.json through {expected}.")
+    if a==b:
+        sync_market_js(old)
+        print(f"No changes; already current through {expected}.")
+        return
+    new["updatedAt"]=datetime.now(TAIPEI).strftime("%Y-%m-%d %H:%M Asia/Taipei"); DATA.write_text(json.dumps(new,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"); sync_market_js(new); print(f"Updated data.json through {expected}.")
 
 if __name__=="__main__": main()
