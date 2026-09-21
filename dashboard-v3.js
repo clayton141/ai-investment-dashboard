@@ -11,6 +11,13 @@ const pct=n=>n==null?'—':(Number(n)>0?'+':'')+Number(n).toFixed(1)+'%';
 const x=n=>n==null?'—':Number(n).toFixed(1)+'x';
 const safe=n=>n==null?'—':Number(n).toFixed(1);
 const days=(a,b)=>a&&b?Math.round((new Date(b)-new Date(a))/86400000):'—';
+function premarketHtml(s){
+  if(!s||s.preMarketState!=='PRE'||s.preMarketPrice==null)return '';
+  const cls=Number(s.preMarketPct)>=0?'pos':'neg';
+  const p=s.preMarketPct==null?'—':(Number(s.preMarketPct)>0?'+':'')+Number(s.preMarketPct).toFixed(2)+'%';
+  return '<div class="row premarket-row"><span class="muted"><span class="pill">PRE</span> 盤前</span><b class="'+cls+'">'+money(s.preMarketPrice)+' · '+p+'</b></div>'+
+    '<div class="small muted" style="text-align:right;margin-top:3px">'+(s.preMarketAsOf||'')+'</div>';
+}
 
 function showLogin(msg=''){
   $('loginView').classList.remove('hidden');
@@ -26,11 +33,9 @@ function showApp(){
 function renderMarket(){
   const wl=Array.isArray(market.watchlist)?market.watchlist:[];
   $('marketAsOf').textContent='Market data: '+(market.asOf||'—')+' · Updated: '+(market.updatedAt||'—')+
-    (market.preMarketStatus==='PRE'&&market.preMarketUpdatedAt?' · PRE updated: '+market.preMarketUpdatedAt:'');
+    (market.preMarketStatus==='PRE'&&market.preMarketUpdatedAt?' · PRE LIVE · '+market.preMarketUpdatedAt:'');
   $('cards').innerHTML=wl.map(s=>{
-    const pre=s.preMarketState==='PRE'&&s.preMarketPrice!=null
-      ? '<div class="row"><span class="muted">PRE</span><b class="'+(s.preMarketPct>=0?'pos':'neg')+'">'+money(s.preMarketPrice)+' · '+pct(s.preMarketPct)+'</b></div><div class="small muted">'+(s.preMarketAsOf||'')+'</div>'
-      : '';
+    const pre=premarketHtml(s);
     return '<div class="card"><div class="ticker">'+s.ticker+' <span class="small muted">'+(s.name||'')+'</span></div>'+
       '<div class="price">'+money(s.price)+'</div><div class="'+(s.dayPct>=0?'pos':'neg')+'">'+pct(s.dayPct)+'</div>'+pre+
       '<div class="row"><span class="muted">RSI</span><b>'+safe(s.rsi14)+'</b></div>'+
@@ -47,7 +52,7 @@ function renderHoldings(list){
     const s=m[h.ticker]||{};
     const u=h.entry_avg&&s.price?100*(s.price-h.entry_avg)/h.entry_avg:null;
     return '<div class="card"><div class="ticker">'+h.ticker+' <span class="pill">HOLDING</span></div>'+
-      '<div class="price">'+money(s.price)+'</div>'+
+      '<div class="price">'+money(s.price)+'</div>'+premarketHtml(s)+
       '<div class="row"><span class="muted">進場日期</span><b>'+(h.entry_date||'—')+'</b></div>'+
       '<div class="row"><span class="muted">進場均價</span><b>'+money(h.entry_avg)+'</b></div>'+
       '<div class="row"><span class="muted">未實現</span><b class="'+(u>=0?'pos':'neg')+'">'+pct(u)+'</b></div>'+
