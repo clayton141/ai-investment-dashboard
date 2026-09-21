@@ -2,9 +2,9 @@ name: Update dashboard premarket prices
 
 on:
   schedule:
-    # Every 30 minutes from 16:00-23:30 Asia/Taipei on US weekdays.
-    # The script itself checks America/New_York time, so DST is handled safely.
-    - cron: '0,30 8-15 * * 1-5'
+    # Every 15 minutes, staggered away from busy clock boundaries. The script itself
+    # checks America/New_York time, so only true US premarket bars are written.
+    - cron: '7,22,37,52 8-15 * * 1-5'
   workflow_dispatch:
   push:
     branches: [main]
