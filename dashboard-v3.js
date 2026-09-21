@@ -104,7 +104,7 @@ async function enterApp(){
   }
   showApp();
   renderMarket();
-  await loadAccountData();
+  await Promise.allSettled([refreshMarketSnapshot(),loadAccountData()]);
 }
 
 async function sendMagicLink(){
@@ -171,17 +171,35 @@ async function saveTrade(id){
   await loadAccountData();
 }
 
-async function refreshMarketSnapshot(){
+async function fetchJson(url,timeoutMs=6000){
+  const ctl=new AbortController();
+  const timer=setTimeout(()=>ctl.abort(),timeoutMs);
   try{
-    const r=await fetch('./data.json?v='+Date.now(),{cache:'no-store'});
-    if(!r.ok)return;
-    const fresh=await r.json();
-    if(fresh&&Array.isArray(fresh.watchlist)){
-      market=fresh;
-      renderMarket();
-      if(window.__holdings)renderHoldings(window.__holdings);
+    const r=await fetch(url,{cache:'no-store',signal:ctl.signal});
+    if(!r.ok)throw new Error(url+' '+r.status);
+    return await r.json();
+  }finally{clearTimeout(timer);}
+}
+
+async function refreshMarketSnapshot(){
+  let fresh=null;
+  try{
+    fresh=await fetchJson('./data.json?v='+Date.now(),5000);
+  }catch(localErr){
+    console.warn('Pages data.json refresh failed',localErr);
+  }
+  if(!fresh||!Array.isArray(fresh.watchlist)){
+    try{
+      fresh=await fetchJson('https://raw.githubusercontent.com/clayton141/ai-investment-dashboard/main/data.json?v='+Date.now(),7000);
+    }catch(rawErr){
+      console.warn('Raw GitHub data refresh failed',rawErr);
     }
-  }catch(e){console.warn('Background market refresh failed',e);}
+  }
+  if(fresh&&Array.isArray(fresh.watchlist)){
+    market=fresh;
+    renderMarket();
+    if(window.__holdings)renderHoldings(window.__holdings);
+  }
 }
 
 async function init(){
@@ -211,6 +229,7 @@ async function init(){
     session=s;
     if(s)await enterApp();else showLogin();
   });
+  refreshMarketSnapshot();
   setInterval(refreshMarketSnapshot,300000);
 }
 
