@@ -12,7 +12,9 @@ const x=n=>n==null?'—':Number(n).toFixed(1)+'x';
 const safe=n=>n==null?'—':Number(n).toFixed(1);
 const days=(a,b)=>a&&b?Math.round((new Date(b)-new Date(a))/86400000):'—';
 function premarketHtml(s){
-  if(!s||s.preMarketState!=='PRE'||s.preMarketPrice==null)return '';
+  if(!s||s.preMarketState!=='PRE'||s.preMarketPrice==null){
+    return '<div class="row premarket-row"><span class="muted"><span class="pill">PRE</span> 盤前</span><b class="muted">尚未開盤</b></div>';
+  }
   const cls=Number(s.preMarketPct)>=0?'pos':'neg';
   const p=s.preMarketPct==null?'—':(Number(s.preMarketPct)>0?'+':'')+Number(s.preMarketPct).toFixed(2)+'%';
   return '<div class="row premarket-row"><span class="muted"><span class="pill">PRE</span> 盤前</span><b class="'+cls+'">'+money(s.preMarketPrice)+' · '+p+'</b></div>'+
