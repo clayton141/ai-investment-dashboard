@@ -27,10 +27,10 @@ window.MARKET_DATA = {
       "coreMetric": "Q2 subscription revenue $3.877B, +24.5% YoY; cRPO $13.2B, +21%; RPO $29.0B, +21%; AI ACV >$1B; FY26 subscription-revenue outlook raised",
       "thesis": "Enterprise workflow + AI Control Tower; system of action for human and agent workflows, with agentic deployments scaling rapidly.",
       "risk": "Agentic AI could abstract the UI; M&A and SBC discipline matter.",
-      "preMarketPrice": 135.86,
-      "preMarketPct": 0.29,
-      "preMarketAsOf": "2026-09-21 05:15 ET",
-      "preMarketState": "PRE"
+      "preMarketPrice": null,
+      "preMarketPct": null,
+      "preMarketAsOf": null,
+      "preMarketState": "CLOSED"
     },
     {
       "ticker": "ZS",
@@ -57,10 +57,10 @@ window.MARKET_DATA = {
       "coreMetric": "FY26 Q4 revenue $898.2M, +25% YoY; ARR $3.771B, +25% including Red Canary / +20% organic; net new ARR $246M; FY26 FCF margin 23%; RPO ~$7.4B, +27%",
       "thesis": "Zero Trust for users, workloads and AI agents; Agentic SOC + data security create meaningful AI-era expansion vectors.",
       "risk": "Organic ARR growth is closer to 20% after adjusting for Red Canary; FY27 rerating requires sustained organic acceleration and clean acquisition integration.",
-      "preMarketPrice": 198.22,
-      "preMarketPct": 0.46,
-      "preMarketAsOf": "2026-09-21 05:10 ET",
-      "preMarketState": "PRE"
+      "preMarketPrice": null,
+      "preMarketPct": null,
+      "preMarketAsOf": null,
+      "preMarketState": "CLOSED"
     },
     {
       "ticker": "RBRK",
@@ -87,10 +87,10 @@ window.MARKET_DATA = {
       "coreMetric": "FY27 Q2 subscription ARR $1.66B, +33% YoY; cloud ARR $1.48B, +39%; revenue $427.3M, +38%; FCF $65.7M / 15% margin; FY27 ARR/revenue/FCF guidance raised",
       "thesis": "Cyber resilience + Rubrik AI + Agent Cloud combine recovery, data security and autonomous AI-agent protection; improving operating leverage adds a second earnings driver.",
       "risk": "Premium multiple and still-large SBC require >30% ARR growth and continued margin expansion; execution risk rises as the platform broadens into agentic security.",
-      "preMarketPrice": 107.5,
-      "preMarketPct": 0.74,
-      "preMarketAsOf": "2026-09-21 04:55 ET",
-      "preMarketState": "PRE"
+      "preMarketPrice": null,
+      "preMarketPct": null,
+      "preMarketAsOf": null,
+      "preMarketState": "CLOSED"
     },
     {
       "ticker": "FTNT",
@@ -117,10 +117,10 @@ window.MARKET_DATA = {
       "coreMetric": "Secure networking/SASE growth with unusually strong cash generation; FY26 revenue and billings outlook was raised after Q1; Virtue AI acquisition expands runtime/agentic AI protection",
       "thesis": "Secure networking + SASE + AI workload protection; Virtue AI expands continuous validation and runtime security for autonomous AI systems.",
       "risk": "Valuation is no longer cheap; AI-security purity and software mix remain lower than ZS/CRWD.",
-      "preMarketPrice": 170.06,
-      "preMarketPct": 0.13,
-      "preMarketAsOf": "2026-09-21 05:17 ET",
-      "preMarketState": "PRE"
+      "preMarketPrice": null,
+      "preMarketPct": null,
+      "preMarketAsOf": null,
+      "preMarketState": "CLOSED"
     },
     {
       "ticker": "MU",
@@ -147,10 +147,10 @@ window.MARKET_DATA = {
       "coreMetric": "FQ3 revenue $41.46B vs $9.30B YoY; FQ4 revenue guide $50B +/- $1B with ~86% gross margin; HBM4 in high-volume shipments; next earnings Sep 30, 2026",
       "thesis": "AI memory cycle, HBM4 demand and data-center DRAM/NAND growth; strategic customer agreements and constrained advanced-memory supply support exceptional earnings power.",
       "risk": "Highly cyclical memory pricing and record capex intensity; expectations are extreme after the large rerating and Sep 30 earnings create event risk.",
-      "preMarketPrice": 1038.06,
-      "preMarketPct": 2.19,
-      "preMarketAsOf": "2026-09-21 05:15 ET",
-      "preMarketState": "PRE"
+      "preMarketPrice": null,
+      "preMarketPct": null,
+      "preMarketAsOf": null,
+      "preMarketState": "CLOSED"
     },
     {
       "ticker": "CRWD",
@@ -177,10 +177,10 @@ window.MARKET_DATA = {
       "coreMetric": "FY27 Q2 revenue $1.47B, +26%; ARR $5.84B, +25%; record net new ARR $333M, +51%; Falcon Flex ARR $2.29B, +101%; FCF $377M / 26% margin; FY27 net-new-ARR growth guide raised to 34% midpoint",
       "thesis": "Cloud-native security platform spanning endpoint, identity, cloud, SIEM and AI-agent security; accelerating net-new ARR and Falcon Flex adoption strengthen the consolidation thesis.",
       "risk": "Exceptional execution is already reflected in an extreme valuation; even modest growth or multiple normalization can create sharp drawdowns.",
-      "preMarketPrice": 237.1,
-      "preMarketPct": -0.23,
-      "preMarketAsOf": "2026-09-21 05:15 ET",
-      "preMarketState": "PRE"
+      "preMarketPrice": null,
+      "preMarketPct": null,
+      "preMarketAsOf": null,
+      "preMarketState": "CLOSED"
     },
     {
       "ticker": "SNOW",
@@ -207,10 +207,10 @@ window.MARKET_DATA = {
       "coreMetric": "FY27 Q2 revenue $1.55B, +35%; product revenue $1.492B, +37%; RPO $9.0B, +30%; NRR 126%; FY27 product-revenue guide raised to $6.07B / +36%; adjusted FCF margin guide 23%",
       "thesis": "Enterprise data + AI consumption platform; product-revenue growth has reaccelerated for three straight quarters while CoCo/CoWork adoption shows AI workloads are becoming a material consumption driver.",
       "risk": "Premium valuation and high SBC remain the key constraints; competition from Databricks and hyperscalers requires sustained product velocity and consumption growth.",
-      "preMarketPrice": 333.85,
-      "preMarketPct": 0.43,
-      "preMarketAsOf": "2026-09-21 04:00 ET",
-      "preMarketState": "PRE"
+      "preMarketPrice": null,
+      "preMarketPct": null,
+      "preMarketAsOf": null,
+      "preMarketState": "CLOSED"
     },
     {
       "ticker": "BE",
@@ -237,10 +237,10 @@ window.MARKET_DATA = {
       "coreMetric": "Q2 revenue $1.065B, +165.5% YoY; product revenue +215%; FY26 revenue guidance raised to $3.9B-$4.2B (~100% growth at midpoint); AI data-center power demand remains the key catalyst",
       "thesis": "On-site power for data centers; AI-driven electricity demand can accelerate deployments where grid interconnection is the bottleneck.",
       "risk": "Project execution, financing needs, customer concentration, policy exposure and volatile expectations.",
-      "preMarketPrice": 274.51,
-      "preMarketPct": 3.34,
-      "preMarketAsOf": "2026-09-21 05:15 ET",
-      "preMarketState": "PRE"
+      "preMarketPrice": null,
+      "preMarketPct": null,
+      "preMarketAsOf": null,
+      "preMarketState": "CLOSED"
     },
     {
       "ticker": "GLW",
@@ -267,10 +267,10 @@ window.MARKET_DATA = {
       "coreMetric": "Q2 core sales $4.74B, +17%; Optical Communications sales $2.07B, +32%; Enterprise Networks +65% with GenAI products growing faster; Sep 11 ATM program allows up to $2B of common-stock issuance",
       "thesis": "Optical connectivity and fiber demand from AI data-center buildouts; accelerating Enterprise Networks sales provide a direct read-through from GenAI infrastructure capex.",
       "risk": "AI exposure is indirect and partly cyclical; the $2B ATM equity program adds dilution and technical-overhang risk.",
-      "preMarketPrice": 154.75,
-      "preMarketPct": 3.08,
-      "preMarketAsOf": "2026-09-21 05:10 ET",
-      "preMarketState": "PRE"
+      "preMarketPrice": null,
+      "preMarketPct": null,
+      "preMarketAsOf": null,
+      "preMarketState": "CLOSED"
     }
   ],
   "automation": {
@@ -303,6 +303,6 @@ window.MARKET_DATA = {
       "ARR/cRPO/billings"
     ]
   },
-  "preMarketStatus": "PRE",
-  "preMarketUpdatedAt": "2026-09-21 17:19 Asia/Taipei"
+  "preMarketStatus": "CLOSED",
+  "preMarketUpdatedAt": "2026-09-21 23:57 Asia/Taipei"
 };
