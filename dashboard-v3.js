@@ -57,7 +57,7 @@ function renderHoldings(list){
       '<div class="price">'+money(s.price)+'</div>'+premarketHtml(s)+
       '<div class="row"><span class="muted">進場日期</span><b>'+(h.entry_date||'—')+'</b></div>'+
       '<div class="row"><span class="muted">進場均價</span><b>'+money(h.entry_avg)+'</b></div>'+
-      '<div class="row"><span class="muted">未實現</span><b class="'+(u>=0?'pos':'neg')+'">'+pct(u)+'</b></div>'+
+      (userRole==='owner'?'<div class="row"><span class="muted">未實現</span><b class="'+(u>=0?'pos':'neg')+'">'+pct(u)+'</b></div>':'')+
       (userRole==='owner'?'<div class="actions" style="margin-top:10px"><button class="btn secondary" data-edit-holding="'+h.id+'">Edit</button><button class="btn danger" data-delete-holding="'+h.id+'">Delete</button></div>':'')+
       '</div>';
   }).join(''):'<div class="notice muted">No holdings yet.</div>';
