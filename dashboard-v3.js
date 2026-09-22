@@ -30,9 +30,9 @@ function premarketHtml(s){
   const weekday=!['Sat','Sun'].includes(clock.weekday);
   const inPre=weekday&&mins>=240&&mins<570;
 
-  const price=(q&&q.preMarketPrice!=null)?q.preMarketPrice:s?.preMarketPrice;
-  const pp=(q&&q.preMarketPct!=null)?q.preMarketPct:s?.preMarketPct;
-  const stamp=(q&&q.preMarketAsOf)?q.preMarketAsOf:s?.preMarketAsOf;
+  const price=(q&&q.preMarketPrice!=null)?q.preMarketPrice:null;
+  const pp=(q&&q.preMarketPct!=null)?q.preMarketPct:null;
+  const stamp=(q&&q.preMarketAsOf)?q.preMarketAsOf:null;
 
   if(inPre){
     if(price==null){
