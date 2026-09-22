@@ -31,7 +31,7 @@ function premarketHtml(s){
 
 function afterHoursHtml(s){
   const q=liveQuotes[s?.ticker];
-  if(!q||q.state!=='POST'||q.postMarketPrice==null)return '';
+  if(!q||q.postMarketPrice==null||!['POST','CLOSED'].includes(q.state))return '';
   const cls=Number(q.postMarketPct)>=0?'pos':'neg';
   const p=q.postMarketPct==null?'—':(Number(q.postMarketPct)>0?'+':'')+Number(q.postMarketPct).toFixed(2)+'%';
   return '<div class="row"><span class="muted"><span class="pill">AH</span> 盤後</span><b class="'+cls+'">'+money(q.postMarketPrice)+' · '+p+'</b></div>'+
@@ -40,8 +40,13 @@ function afterHoursHtml(s){
 
 function currentDisplay(s){
   const q=liveQuotes[s?.ticker];
-  if(q&&q.state==='REGULAR'&&q.price!=null){
-    return {price:q.price,pct:q.changePct,label:'<span class="pill">LIVE</span> '};
+  if(q){
+    if(q.state==='REGULAR'&&q.price!=null){
+      return {price:q.price,pct:q.changePct,label:'<span class="pill">LIVE</span> '};
+    }
+    if(q.regularMarketPrice!=null){
+      return {price:q.regularMarketPrice,pct:q.regularMarketPct,label:''};
+    }
   }
   return {price:s?.price,pct:s?.dayPct,label:''};
 }
@@ -211,11 +216,20 @@ async function fetchJson(url,timeoutMs=6000){
 }
 
 async function refreshLiveQuotes(){
-  if(!sb||!session)return;
   try{
     const symbols=(market.watchlist||[]).map(s=>s.ticker);
-    const {data,error}=await sb.functions.invoke('market-quotes',{body:{symbols}});
-    if(error)throw error;
+    if(!symbols.length)return;
+    const url='https://rrxfqwfnubipbmoyoewj.supabase.co/functions/v1/market-quotes?symbols='+encodeURIComponent(symbols.join(','))+'&t='+Date.now();
+    const ctl=new AbortController();
+    const timer=setTimeout(()=>ctl.abort(),12000);
+    let data;
+    try{
+      const r=await fetch(url,{cache:'no-store',signal:ctl.signal,headers:{'Accept':'application/json'}});
+      if(!r.ok)throw new Error('Live endpoint HTTP '+r.status);
+      data=await r.json();
+    }finally{
+      clearTimeout(timer);
+    }
     const ok=(data?.quotes||[]).filter(q=>q&&q.symbol&&!q.error);
     if(!ok.length)throw new Error('No live quotes returned');
     liveQuotes=Object.fromEntries(ok.map(q=>[q.symbol,q]));
@@ -224,6 +238,10 @@ async function refreshLiveQuotes(){
     if(window.__holdings)renderHoldings(window.__holdings);
   }catch(e){
     console.warn('Live quote refresh failed',e);
+    const header=$('marketAsOf');
+    if(header&&!header.textContent.includes('Live quote error')){
+      header.textContent += ' · Live quote error';
+    }
   }
 }
 
@@ -278,7 +296,7 @@ async function init(){
   refreshMarketSnapshot();
   refreshLiveQuotes();
   setInterval(refreshMarketSnapshot,300000);
-  setInterval(refreshLiveQuotes,60000);
+  setInterval(refreshLiveQuotes,30000);
   window.addEventListener('focus',refreshLiveQuotes);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshLiveQuotes();});
 }
