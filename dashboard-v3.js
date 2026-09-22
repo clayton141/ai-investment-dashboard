@@ -179,7 +179,12 @@ async function sendMagicLink(){
     if(error)throw error;
     $('loginMsg').textContent='Check your email for the sign-in link.';
   }catch(e){
-    $('loginMsg').textContent=e.message||'Unable to send sign-in link.';
+    const msg=String(e?.message||'');
+    if(msg.toLowerCase().includes('rate limit')){
+      $('loginMsg').textContent='Magic Link 寄送次數已達 Supabase Auth 限制。這不是白名單人數問題；請稍後再試，或由管理者改用自訂 SMTP。';
+    }else{
+      $('loginMsg').textContent=msg||'Unable to send sign-in link.';
+    }
   }finally{
     $('loginBtn').disabled=false;
   }
