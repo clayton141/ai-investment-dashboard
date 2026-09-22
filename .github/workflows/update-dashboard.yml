@@ -2,11 +2,13 @@ name: Update investment dashboard data
 
 on:
   schedule:
-    # Three post-close attempts for provider-lag resilience.
-    # 09:35, 11:35 and 13:35 Asia/Taipei, Tuesday-Saturday.
-    - cron: '35 1 * * 2-6'
-    - cron: '35 3 * * 2-6'
-    - cron: '35 5 * * 2-6'
+    # Multiple post-close attempts so the dashboard is current before Taiwan work hours.
+    # 07:17, 08:17, 09:17 and 11:17 Asia/Taipei. The script identifies
+    # the latest completed NYSE session and safely no-ops on holidays/weekends.
+    - cron: '17 23 * * *'
+    - cron: '17 0 * * *'
+    - cron: '17 1 * * *'
+    - cron: '17 3 * * *'
   workflow_dispatch:
   push:
     branches: [main]
