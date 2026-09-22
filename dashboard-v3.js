@@ -13,20 +13,38 @@ const pct=n=>n==null?'—':(Number(n)>0?'+':'')+Number(n).toFixed(1)+'%';
 const x=n=>n==null?'—':Number(n).toFixed(1)+'x';
 const safe=n=>n==null?'—':Number(n).toFixed(1);
 const days=(a,b)=>a&&b?Math.round((new Date(b)-new Date(a))/86400000):'—';
+function marketClock(){
+  const now=new Date();
+  const parts=new Intl.DateTimeFormat('en-US',{
+    timeZone:'America/New_York',
+    hour12:false,weekday:'short',hour:'2-digit',minute:'2-digit'
+  }).formatToParts(now);
+  const map=Object.fromEntries(parts.map(p=>[p.type,p.value]));
+  return {weekday:map.weekday,h:Number(map.hour),m:Number(map.minute)};
+}
+
 function premarketHtml(s){
   const q=liveQuotes[s?.ticker];
-  const livePre=q&&q.state==='PRE'&&q.preMarketPrice!=null;
-  const price=livePre?q.preMarketPrice:s?.preMarketPrice;
-  const pp=livePre?q.preMarketPct:s?.preMarketPct;
-  const stamp=livePre?q.preMarketAsOf:s?.preMarketAsOf;
-  const state=livePre?'PRE':s?.preMarketState;
-  if(state!=='PRE'||price==null){
-    return '<div class="row premarket-row"><span class="muted"><span class="pill">PRE</span> 盤前</span><b class="muted">尚未開盤</b></div>';
+  const clock=marketClock();
+  const mins=clock.h*60+clock.m;
+  const weekday=!['Sat','Sun'].includes(clock.weekday);
+  const inPre=weekday&&mins>=240&&mins<570;
+
+  const price=(q&&q.preMarketPrice!=null)?q.preMarketPrice:s?.preMarketPrice;
+  const pp=(q&&q.preMarketPct!=null)?q.preMarketPct:s?.preMarketPct;
+  const stamp=(q&&q.preMarketAsOf)?q.preMarketAsOf:s?.preMarketAsOf;
+
+  if(inPre){
+    if(price==null){
+      return '<div class="row premarket-row"><span class="muted"><span class="pill">PRE</span> 盤前</span><b class="muted">抓取中…</b></div>';
+    }
+    const cls=Number(pp)>=0?'pos':'neg';
+    const p=pp==null?'—':(Number(pp)>0?'+':'')+Number(pp).toFixed(2)+'%';
+    return '<div class="row premarket-row"><span class="muted"><span class="pill">PRE</span> 盤前</span><b class="'+cls+'">'+money(price)+' · '+p+'</b></div>'+
+      '<div class="small muted" style="text-align:right;margin-top:3px">'+(stamp||'')+'</div>';
   }
-  const cls=Number(pp)>=0?'pos':'neg';
-  const p=pp==null?'—':(Number(pp)>0?'+':'')+Number(pp).toFixed(2)+'%';
-  return '<div class="row premarket-row"><span class="muted"><span class="pill">PRE</span> 盤前</span><b class="'+cls+'">'+money(price)+' · '+p+'</b></div>'+
-    '<div class="small muted" style="text-align:right;margin-top:3px">'+(stamp||'')+'</div>';
+
+  return '<div class="row premarket-row"><span class="muted"><span class="pill">PRE</span> 盤前</span><b class="muted">16:00 TPE 開始</b></div>';
 }
 
 function afterHoursHtml(s){
@@ -36,6 +54,13 @@ function afterHoursHtml(s){
   const p=q.postMarketPct==null?'—':(Number(q.postMarketPct)>0?'+':'')+Number(q.postMarketPct).toFixed(2)+'%';
   return '<div class="row"><span class="muted"><span class="pill">AH</span> 盤後</span><b class="'+cls+'">'+money(q.postMarketPrice)+' · '+p+'</b></div>'+
     '<div class="small muted" style="text-align:right;margin-top:3px">'+(q.postMarketAsOf||'')+'</div>';
+}
+
+function liveQuoteHealth(){
+  if(!liveFetchedAt)return '';
+  const age=(Date.now()-new Date(liveFetchedAt).getTime())/1000;
+  if(age>90)return ' · ⚠ quote stale';
+  return '';
 }
 
 function currentDisplay(s){
@@ -64,9 +89,12 @@ function showApp(){
 
 function renderMarket(){
   const wl=Array.isArray(market.watchlist)?market.watchlist:[];
+  const states=Object.values(liveQuotes).map(q=>q?.state).filter(Boolean);
+  const state=states.includes('REGULAR')?'REGULAR':states.includes('PRE')?'PRE':states.includes('POST')?'POST':'CLOSED';
+  const stateLabel=state==='REGULAR'?'LIVE':state==='PRE'?'PRE LIVE':state==='POST'?'AH LIVE':'MARKET CLOSED';
   $('marketAsOf').textContent='Market data: '+(market.asOf||'—')+' · Updated: '+(market.updatedAt||'—')+
-    (liveFetchedAt?' · Live quotes: '+new Date(liveFetchedAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}):
-    (market.preMarketStatus==='PRE'&&market.preMarketUpdatedAt?' · PRE · '+market.preMarketUpdatedAt:''));
+    ' · '+stateLabel+
+    (liveFetchedAt?' · quotes '+new Date(liveFetchedAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}):'')+liveQuoteHealth();
   $('cards').innerHTML=wl.map(s=>{
     const pre=premarketHtml(s);
     const ah=afterHoursHtml(s);
