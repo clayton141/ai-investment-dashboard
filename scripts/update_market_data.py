@@ -7,6 +7,7 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 import pandas_market_calendars as mcal
+import requests
 import yfinance as yf
 
 DATA = Path("data.json")
@@ -65,28 +66,66 @@ def expected_session():
     return done.index[-1].date().isoformat()
 
 
-def session_day(value):
-    ts = pd.Timestamp(value)
-    if ts.tzinfo is None: return ts.date().isoformat()
-    return ts.tz_convert(NEW_YORK).date().isoformat()
-
-
 def history(symbol, expected):
-    end = datetime.fromisoformat(expected).date() + timedelta(days=2)
-    start = end - timedelta(days=800)
-    df = yf.download(symbol,start=start.isoformat(),end=end.isoformat(),interval="1d",auto_adjust=False,progress=False,threads=False)
-    if df is None or df.empty: raise RuntimeError("no history")
-    if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
-    raw_close = pd.to_numeric(df["Close"], errors="coerce")
-    indicator_close = raw_close
-    if "Adj Close" in df: indicator_close = pd.to_numeric(df["Adj Close"], errors="coerce").fillna(raw_close)
-    df["RawClose"], df["IndicatorClose"] = raw_close, indicator_close
-    dates = pd.Index([session_day(i) for i in df.index])
-    if expected not in set(dates):
-        last = dates[-1] if len(dates) else "none"
-        raise RuntimeError(f"latest_session={last}, expected={expected}")
-    df = df.loc[dates <= expected].dropna(subset=["RawClose", "IndicatorClose"])
-    if len(df) < 210: raise RuntimeError(f"only {len(df)} rows")
+    params = {
+        "range": "3y",
+        "interval": "1d",
+        "includePrePost": "false",
+        "events": "div,splits",
+    }
+    result = None
+    last_error = None
+    for host in ("https://query1.finance.yahoo.com", "https://query2.finance.yahoo.com"):
+        try:
+            r = requests.get(
+                f"{host}/v8/finance/chart/{symbol}",
+                params=params,
+                timeout=20,
+                headers={"User-Agent": "Mozilla/5.0", "Accept": "application/json"},
+            )
+            r.raise_for_status()
+            payload = r.json()
+            result = (payload.get("chart", {}).get("result") or [None])[0]
+            if result:
+                break
+            last_error = payload.get("chart", {}).get("error")
+        except Exception as e:
+            last_error = str(e)
+    if not result:
+        raise RuntimeError(f"chart api failed: {last_error}")
+
+    timestamps = result.get("timestamp") or []
+    quote = ((result.get("indicators") or {}).get("quote") or [{}])[0]
+    adj = ((result.get("indicators") or {}).get("adjclose") or [{}])[0]
+    closes = quote.get("close") or []
+    adjcloses = adj.get("adjclose") or []
+
+    rows = []
+    for i, ts in enumerate(timestamps):
+        if i >= len(closes):
+            continue
+        raw = num(closes[i])
+        if raw is None:
+            continue
+        day = datetime.fromtimestamp(int(ts), tz=ZoneInfo("UTC")).astimezone(NEW_YORK).date().isoformat()
+        indicator = raw
+        if i < len(adjcloses):
+            av = num(adjcloses[i])
+            if av is not None:
+                indicator = av
+        rows.append((day, raw, indicator))
+
+    if not rows:
+        raise RuntimeError("no daily chart rows")
+
+    df = pd.DataFrame(rows, columns=["Session", "RawClose", "IndicatorClose"])
+    df = df.drop_duplicates(subset=["Session"], keep="last").sort_values("Session")
+    if expected not in set(df["Session"]):
+        raise RuntimeError(f"latest_session={df['Session'].iloc[-1]}, expected={expected}")
+    df = df.loc[df["Session"] <= expected].copy()
+    if len(df) < 210:
+        raise RuntimeError(f"only {len(df)} rows")
+    df.index = pd.RangeIndex(len(df))
     return df
 
 
@@ -130,7 +169,7 @@ def main():
         try: s.update(fundamentals(symbol))
         except Exception as e: warnings[symbol]=str(e)
     new["asOf"]=expected
-    new["automation"]={"marketData":"Yahoo Finance explicit-date download","schedule":"Tue-Sat 09:35, 11:35 and 13:35 Asia/Taipei","autoFields":list(TECH+FUND),"preservedFields":["aiOpportunity","companyQuality","valuation","riskReward","thesis","risk","bearPct","basePct","bullPct","ARR/cRPO/billings"]}
+    new["automation"]={"marketData":"Yahoo Finance Chart API daily bars","schedule":"07:17, 08:17, 09:17 and 11:17 Asia/Taipei with holiday-safe no-op","autoFields":list(TECH+FUND),"preservedFields":["aiOpportunity","companyQuality","valuation","riskReward","thesis","risk","bearPct","basePct","bullPct","ARR/cRPO/billings"]}
     if warnings: new["automation"]["warnings"]=warnings
     a,b=copy.deepcopy(old),copy.deepcopy(new); a.pop("updatedAt",None); b.pop("updatedAt",None)
     if a==b:
