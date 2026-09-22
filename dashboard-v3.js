@@ -4,6 +4,8 @@ let sb=null;
 let session=null;
 let userRole='viewer';
 let market=window.MARKET_DATA || {watchlist:[]};
+let liveQuotes={};
+let liveFetchedAt=null;
 
 const $=id=>document.getElementById(id);
 const money=n=>n==null?'—':'$'+Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
@@ -12,13 +14,36 @@ const x=n=>n==null?'—':Number(n).toFixed(1)+'x';
 const safe=n=>n==null?'—':Number(n).toFixed(1);
 const days=(a,b)=>a&&b?Math.round((new Date(b)-new Date(a))/86400000):'—';
 function premarketHtml(s){
-  if(!s||s.preMarketState!=='PRE'||s.preMarketPrice==null){
+  const q=liveQuotes[s?.ticker];
+  const livePre=q&&q.state==='PRE'&&q.preMarketPrice!=null;
+  const price=livePre?q.preMarketPrice:s?.preMarketPrice;
+  const pp=livePre?q.preMarketPct:s?.preMarketPct;
+  const stamp=livePre?q.preMarketAsOf:s?.preMarketAsOf;
+  const state=livePre?'PRE':s?.preMarketState;
+  if(state!=='PRE'||price==null){
     return '<div class="row premarket-row"><span class="muted"><span class="pill">PRE</span> 盤前</span><b class="muted">尚未開盤</b></div>';
   }
-  const cls=Number(s.preMarketPct)>=0?'pos':'neg';
-  const p=s.preMarketPct==null?'—':(Number(s.preMarketPct)>0?'+':'')+Number(s.preMarketPct).toFixed(2)+'%';
-  return '<div class="row premarket-row"><span class="muted"><span class="pill">PRE</span> 盤前</span><b class="'+cls+'">'+money(s.preMarketPrice)+' · '+p+'</b></div>'+
-    '<div class="small muted" style="text-align:right;margin-top:3px">'+(s.preMarketAsOf||'')+'</div>';
+  const cls=Number(pp)>=0?'pos':'neg';
+  const p=pp==null?'—':(Number(pp)>0?'+':'')+Number(pp).toFixed(2)+'%';
+  return '<div class="row premarket-row"><span class="muted"><span class="pill">PRE</span> 盤前</span><b class="'+cls+'">'+money(price)+' · '+p+'</b></div>'+
+    '<div class="small muted" style="text-align:right;margin-top:3px">'+(stamp||'')+'</div>';
+}
+
+function afterHoursHtml(s){
+  const q=liveQuotes[s?.ticker];
+  if(!q||q.state!=='POST'||q.postMarketPrice==null)return '';
+  const cls=Number(q.postMarketPct)>=0?'pos':'neg';
+  const p=q.postMarketPct==null?'—':(Number(q.postMarketPct)>0?'+':'')+Number(q.postMarketPct).toFixed(2)+'%';
+  return '<div class="row"><span class="muted"><span class="pill">AH</span> 盤後</span><b class="'+cls+'">'+money(q.postMarketPrice)+' · '+p+'</b></div>'+
+    '<div class="small muted" style="text-align:right;margin-top:3px">'+(q.postMarketAsOf||'')+'</div>';
+}
+
+function currentDisplay(s){
+  const q=liveQuotes[s?.ticker];
+  if(q&&q.state==='REGULAR'&&q.price!=null){
+    return {price:q.price,pct:q.changePct,label:'<span class="pill">LIVE</span> '};
+  }
+  return {price:s?.price,pct:s?.dayPct,label:''};
 }
 
 function showLogin(msg=''){
@@ -35,11 +60,14 @@ function showApp(){
 function renderMarket(){
   const wl=Array.isArray(market.watchlist)?market.watchlist:[];
   $('marketAsOf').textContent='Market data: '+(market.asOf||'—')+' · Updated: '+(market.updatedAt||'—')+
-    (market.preMarketStatus==='PRE'&&market.preMarketUpdatedAt?' · PRE LIVE · '+market.preMarketUpdatedAt:'');
+    (liveFetchedAt?' · Live quotes: '+new Date(liveFetchedAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}):
+    (market.preMarketStatus==='PRE'&&market.preMarketUpdatedAt?' · PRE · '+market.preMarketUpdatedAt:''));
   $('cards').innerHTML=wl.map(s=>{
     const pre=premarketHtml(s);
+    const ah=afterHoursHtml(s);
+    const d=currentDisplay(s);
     return '<div class="card"><div class="ticker">'+s.ticker+' <span class="small muted">'+(s.name||'')+'</span></div>'+
-      '<div class="price">'+money(s.price)+'</div><div class="'+(s.dayPct>=0?'pos':'neg')+'">'+pct(s.dayPct)+'</div>'+pre+
+      '<div class="price">'+d.label+money(d.price)+'</div><div class="'+(d.pct>=0?'pos':'neg')+'">'+pct(d.pct)+'</div>'+pre+ah+
       '<div class="row"><span class="muted">RSI</span><b>'+safe(s.rsi14)+'</b></div>'+
       '<div class="row"><span class="muted">MA20/50/200</span><b>'+safe(s.ma20)+' / '+safe(s.ma50)+' / '+safe(s.ma200)+'</b></div>'+
       '<div class="row"><span class="muted">Risk/Reward</span><b>'+safe(s.riskReward)+'/10</b></div></div>';
@@ -52,9 +80,10 @@ function renderHoldings(list){
   const m=Object.fromEntries((market.watchlist||[]).map(s=>[s.ticker,s]));
   $('holdings').innerHTML=list.length?list.map(h=>{
     const s=m[h.ticker]||{};
-    const u=h.entry_avg&&s.price?100*(s.price-h.entry_avg)/h.entry_avg:null;
+    const d=currentDisplay(s);
+    const u=h.entry_avg&&d.price?100*(d.price-h.entry_avg)/h.entry_avg:null;
     return '<div class="card"><div class="ticker">'+h.ticker+' <span class="pill">HOLDING</span></div>'+
-      '<div class="price">'+money(s.price)+'</div>'+premarketHtml(s)+
+      '<div class="price">'+d.label+money(d.price)+'</div>'+premarketHtml(s)+afterHoursHtml(s)+
       '<div class="row"><span class="muted">進場日期</span><b>'+(h.entry_date||'—')+'</b></div>'+
       (userRole==='owner'?'<div class="row"><span class="muted">進場均價</span><b>'+money(h.entry_avg)+'</b></div>':'')+
       (userRole==='owner'?'<div class="row"><span class="muted">未實現</span><b class="'+(u>=0?'pos':'neg')+'">'+pct(u)+'</b></div>':'')+
@@ -104,7 +133,7 @@ async function enterApp(){
   }
   showApp();
   renderMarket();
-  await Promise.allSettled([refreshMarketSnapshot(),loadAccountData()]);
+  await Promise.allSettled([refreshMarketSnapshot(),loadAccountData(),refreshLiveQuotes()]);
 }
 
 async function sendMagicLink(){
@@ -181,6 +210,23 @@ async function fetchJson(url,timeoutMs=6000){
   }finally{clearTimeout(timer);}
 }
 
+async function refreshLiveQuotes(){
+  if(!sb||!session)return;
+  try{
+    const symbols=(market.watchlist||[]).map(s=>s.ticker);
+    const {data,error}=await sb.functions.invoke('market-quotes',{body:{symbols}});
+    if(error)throw error;
+    const ok=(data?.quotes||[]).filter(q=>q&&q.symbol&&!q.error);
+    if(!ok.length)throw new Error('No live quotes returned');
+    liveQuotes=Object.fromEntries(ok.map(q=>[q.symbol,q]));
+    liveFetchedAt=data.fetchedAt||new Date().toISOString();
+    renderMarket();
+    if(window.__holdings)renderHoldings(window.__holdings);
+  }catch(e){
+    console.warn('Live quote refresh failed',e);
+  }
+}
+
 async function refreshMarketSnapshot(){
   let fresh=null;
   try{
@@ -230,7 +276,11 @@ async function init(){
     if(s)await enterApp();else showLogin();
   });
   refreshMarketSnapshot();
+  refreshLiveQuotes();
   setInterval(refreshMarketSnapshot,300000);
+  setInterval(refreshLiveQuotes,60000);
+  window.addEventListener('focus',refreshLiveQuotes);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshLiveQuotes();});
 }
 
 document.addEventListener('DOMContentLoaded',init);
