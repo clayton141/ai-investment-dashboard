@@ -27,5 +27,9 @@ jobs:
           assert all(x.get("symbol") for x in q), d
           print("OK fetchedAt=", d.get("fetchedAt"))
           for x in q:
-              print(x.get("symbol"), x.get("state"), x.get("price"), x.get("changePct"), x.get("error"))
+              print(x.get("symbol"), x.get("state"), "price=", x.get("price"), "pre=", x.get("preMarketPrice"), "preBase=", x.get("preMarketBase"), "prePct=", x.get("preMarketPct"), "err=", x.get("error"))
+              if x.get("symbol") == "MU" and x.get("preMarketPrice") is not None and x.get("preMarketBase") is not None:
+                  expected_negative = x["preMarketPrice"] < x["preMarketBase"]
+                  if expected_negative:
+                      assert x.get("preMarketPct") is not None and x["preMarketPct"] < 0, x
           PY
