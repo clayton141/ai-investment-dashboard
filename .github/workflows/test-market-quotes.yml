@@ -1,0 +1,31 @@
+name: Test market quote endpoint
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/test-market-quotes.yml'
+  workflow_dispatch:
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch live market quotes
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://rrxfqwfnubipbmoyoewj.supabase.co/functions/v1/market-quotes?symbols=NOW,MU,CRWD'
+          echo "GET $URL"
+          BODY="$(curl --fail --silent --show-error --max-time 25 "$URL")"
+          echo "$BODY"
+          python - <<'PY' "$BODY"
+          import json, sys
+          d=json.loads(sys.argv[1])
+          q=d.get("quotes",[])
+          assert len(q)==3, d
+          assert all(x.get("symbol") for x in q), d
+          print("OK fetchedAt=", d.get("fetchedAt"))
+          for x in q:
+              print(x.get("symbol"), x.get("state"), x.get("price"), x.get("changePct"), x.get("error"))
+          PY
