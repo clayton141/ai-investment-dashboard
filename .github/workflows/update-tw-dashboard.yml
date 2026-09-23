@@ -1,0 +1,48 @@
+name: Update Taiwan dashboard data
+
+on:
+  schedule:
+    # After Taiwan market close, with retries.
+    - cron: '10 6 * * 1-5'
+    - cron: '40 6 * * 1-5'
+    - cron: '10 7 * * 1-5'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/update_tw_data.py'
+      - '.github/workflows/update-tw-dashboard.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dashboard-tw-update
+  cancel-in-progress: true
+
+jobs:
+  update-tw:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --upgrade pip pandas requests
+      - run: python scripts/update_tw_data.py
+      - name: Commit tw-data.json if changed
+        shell: bash
+        run: |
+          if git diff --quiet -- tw-data.json; then
+            echo 'No TW changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tw-data.json
+          git commit -m "Auto-update Taiwan dashboard data $(date -u +%F)"
+          git pull --rebase origin main
+          git push origin HEAD:main
