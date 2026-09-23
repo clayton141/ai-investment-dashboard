@@ -76,15 +76,9 @@
   window.addEventListener('tw-market-updated',()=>setTimeout(patch,0));
   window.addEventListener('focus',()=>setTimeout(patch,0));
 
-  const obs=new MutationObserver(()=>{
-    clearTimeout(window.__twHoldingPatchTimer);
-    window.__twHoldingPatchTimer=setTimeout(patch,20);
-  });
-
   function start(){
-    const root=document.getElementById('holdings');
-    if(root)obs.observe(root,{childList:true,subtree:true});
     patch();
+    setInterval(patch,1000);
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);
