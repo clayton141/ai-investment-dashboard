@@ -11,11 +11,13 @@
     const tw=window.TW_DASHBOARD;
     const list=Array.isArray(tw?.data?.watchlist)?tw.data.watchlist:[];
     const raw=String(ticker||'').trim().toUpperCase();
+    const codeMatch=raw.match(/(?:^|\D)(\d{4})(?:\D|$)/);
+    const numericCode=codeMatch?codeMatch[1]:null;
     return list.find(s=>{
       const full=String(s.ticker||'').toUpperCase();
       const code=String(s.code||'').toUpperCase();
       const bare=full.replace(/\.(TW|TWO)$/,'');
-      return raw===full||raw===code||raw===bare;
+      return raw===full||raw===code||raw===bare||(numericCode&&numericCode===code);
     })||null;
   }
   function twSnapshot(stock){
