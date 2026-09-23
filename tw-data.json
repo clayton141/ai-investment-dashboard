@@ -1,0 +1,30 @@
+{
+  "asOf": null,
+  "updatedAt": null,
+  "watchlist": [
+    {
+      "ticker": "3529.TWO",
+      "code": "3529",
+      "name": "力旺",
+      "market": "TPEx",
+      "price": null,
+      "dayPct": null,
+      "rsi14": null,
+      "ma20": null,
+      "ma50": null,
+      "ma200": null
+    },
+    {
+      "ticker": "3443.TW",
+      "code": "3443",
+      "name": "創意",
+      "market": "TWSE",
+      "price": null,
+      "dayPct": null,
+      "rsi14": null,
+      "ma20": null,
+      "ma50": null,
+      "ma200": null
+    }
+  ]
+}
