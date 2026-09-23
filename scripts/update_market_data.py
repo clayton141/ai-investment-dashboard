@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Refresh trigger: 2026-09-23
+# Refresh trigger: 2026-09-18
 import copy, json, math
 from datetime import datetime, timedelta
 from pathlib import Path
