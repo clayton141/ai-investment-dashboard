@@ -5,6 +5,16 @@
   let twQuotes={};
   let lastLive=null;
 
+  window.TW_DASHBOARD={
+    get data(){return twData;},
+    get quotes(){return twQuotes;},
+    isRegular:()=>isTwRegular()
+  };
+
+  function notify(){
+    window.dispatchEvent(new CustomEvent('tw-market-updated'));
+  }
+
   const $=id=>document.getElementById(id);
   const twd=n=>n==null?'—':'NT$'+Number(n).toLocaleString('zh-TW',{maximumFractionDigits:2});
   const pct=n=>n==null?'—':(Number(n)>0?'+':'')+Number(n).toFixed(2)+'%';
@@ -62,6 +72,7 @@
       if(!r.ok)throw new Error('tw-data '+r.status);
       twData=await r.json();
       render();
+      notify();
     }catch(e){
       console.warn('TW static data failed',e);
     }
@@ -87,6 +98,7 @@
         twQuotes=Object.fromEntries(ok.map(q=>[q.symbol,q]));
         lastLive=data.fetchedAt||new Date().toISOString();
         render();
+        notify();
       }
     }catch(e){
       console.warn('TW live data failed',e);
