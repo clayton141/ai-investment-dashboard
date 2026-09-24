@@ -154,9 +154,9 @@ async function loadAccountData(){
 }
 
 async function enterApp(){
-  const email=session?.user?.email;
+  const email=String(session?.user?.email||'').trim().toLowerCase();
   if(!email){showLogin();return;}
-  const {data:member,error}=await sb.from('app_members').select('role,display_name').eq('email',email).maybeSingle();
+  const {data:member,error}=await sb.from('app_members').select('role,display_name').ilike('email',email).maybeSingle();
   if(error||!member){showLogin('This email is not approved for this dashboard.');return;}
   userRole=member.role||'viewer';
   $('roleBadge').textContent=userRole.toUpperCase();
