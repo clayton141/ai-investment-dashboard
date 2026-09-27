@@ -1,6 +1,6 @@
 window.MARKET_DATA = {
   "asOf": "2026-09-25",
-  "updatedAt": "2026-09-26 12:57 Asia/Taipei",
+  "updatedAt": "2026-09-27 09:25 Asia/Taipei",
   "watchlist": [
     {
       "ticker": "NOW",
@@ -256,7 +256,7 @@ window.MARKET_DATA = {
       "sbcRevenue": 2.5,
       "forwardPE": 35.9,
       "evSales": 8.4,
-      "pFcf": 56.3,
+      "pFcf": 56.4,
       "aiOpportunity": 8,
       "companyQuality": 8.5,
       "valuation": 6,
