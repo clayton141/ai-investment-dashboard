@@ -1,6 +1,6 @@
 window.MARKET_DATA = {
   "asOf": "2026-09-25",
-  "updatedAt": "2026-09-27 12:10 Asia/Taipei",
+  "updatedAt": "2026-09-27 12:20 Asia/Taipei",
   "watchlist": [
     {
       "ticker": "NOW",
@@ -306,6 +306,41 @@ window.MARKET_DATA = {
       "preMarketPct": null,
       "preMarketAsOf": null,
       "preMarketState": "CLOSED"
+    },
+    {
+      "ticker": "6533",
+      "yahooSymbol": "6533.TWO",
+      "name": "晶心科 Andes",
+      "market": "TW",
+      "currency": "TWD",
+      "price": 276,
+      "dayPct": 9.96,
+      "rsi14": null,
+      "ma20": 253.9,
+      "ma50": null,
+      "ma200": null,
+      "revenueGrowth": 40.4,
+      "fcfMargin": null,
+      "sbcRevenue": null,
+      "forwardPE": null,
+      "evSales": null,
+      "pFcf": null,
+      "aiOpportunity": 8.5,
+      "companyQuality": 8,
+      "valuation": 5.5,
+      "riskReward": 7.5,
+      "bearPct": -30,
+      "basePct": 25,
+      "bullPct": 60,
+      "coreMetric": "2026 Jan-Aug cumulative revenue NT$1.127B, +40.4% YoY; August revenue -25.7% YoY after a very strong June, highlighting lumpy licensing recognition. RISC-V CPU IP adoption and royalty conversion are the key long-term drivers.",
+      "thesis": "RISC-V CPU IP + royalty model with AI/edge-compute exposure; AndeSentry adds hardware/software security optionality through memory protection, trusted execution and secure platform features.",
+      "risk": "Revenue can be lumpy because licensing recognition is project-driven; security is still an optionality rather than the main monetization engine. RISC-V competition and slower royalty conversion could compress expectations.",
+      "dailyView": "偏多但不追漲停：9/24 收 276、單日 +9.96%，站回 20 日均線約 253.9，且成交量明顯放大。基本面核心仍是 RISC-V 授權轉 royalty；AndeSentry 資安是加分項，但目前還不能當主要獲利引擎。",
+      "viewUpdatedAt": "2026-09-27",
+      "preMarketPrice": null,
+      "preMarketPct": null,
+      "preMarketAsOf": null,
+      "preMarketState": "CLOSED"
     }
   ],
   "automation": {
@@ -341,7 +376,8 @@ window.MARKET_DATA = {
   "preMarketStatus": "CLOSED",
   "preMarketUpdatedAt": "2026-09-21 23:57 Asia/Taipei",
   "twWatchlist": [
-    "3529"
+    "3529",
+    "6533"
   ],
   "twAsOf": "2026-09-24"
 };
