@@ -1,6 +1,6 @@
 {
   "asOf": "2026-09-25",
-  "updatedAt": "2026-09-27 09:54 Asia/Taipei",
+  "updatedAt": "2026-09-27 12:10 Asia/Taipei",
   "watchlist": [
     {
       "ticker": "NOW",
@@ -271,6 +271,41 @@
       "preMarketPct": null,
       "preMarketAsOf": null,
       "preMarketState": "CLOSED"
+    },
+    {
+      "ticker": "3529",
+      "yahooSymbol": "3529.TWO",
+      "name": "力旺 eMemory",
+      "market": "TW",
+      "currency": "TWD",
+      "price": 3230,
+      "dayPct": -2.27,
+      "rsi14": 68,
+      "ma20": 2710,
+      "ma50": null,
+      "ma200": null,
+      "revenueGrowth": 20.2,
+      "fcfMargin": null,
+      "sbcRevenue": null,
+      "forwardPE": 94.1,
+      "evSales": null,
+      "pFcf": null,
+      "aiOpportunity": 9,
+      "companyQuality": 9.5,
+      "valuation": 4,
+      "riskReward": 7.5,
+      "bearPct": -25,
+      "basePct": 18,
+      "bullPct": 55,
+      "coreMetric": "2026E revenue NT$4.63B (~+20% YoY); 2026E EPS 34.34; 2027E EPS 44.31 (~+29% YoY). Advanced-node OTP/PUF/MTP royalty ramp is the key 2027 earnings driver.",
+      "thesis": "High-margin semiconductor IP royalty model; advanced-node OTP, PUF hardware root-of-trust, MTP and AI/HBM-related design-ins can create a multi-year royalty harvest cycle.",
+      "risk": "Valuation is the main risk: ~94x 2026E P/E at NT$3,230. A delay in 3nm/2nm royalty ramp, PUF monetization or broader semiconductor design activity could cause sharp multiple compression.",
+      "dailyView": "偏多但不追價：3,100 成本仍有優勢；9/22–9/23 急漲後 9/24 回檔至 3,230，短線需要消化乖離。中期核心仍看 3nm/2nm royalty、PUF 與 MTP 放量。",
+      "viewUpdatedAt": "2026-09-27",
+      "preMarketPrice": null,
+      "preMarketPct": null,
+      "preMarketAsOf": null,
+      "preMarketState": "CLOSED"
     }
   ],
   "automation": {
@@ -305,6 +340,8 @@
   },
   "preMarketStatus": "CLOSED",
   "preMarketUpdatedAt": "2026-09-21 23:57 Asia/Taipei",
-  "twWatchlist": [],
-  "twAsOf": null
+  "twWatchlist": [
+    "3529"
+  ],
+  "twAsOf": "2026-09-24"
 }
